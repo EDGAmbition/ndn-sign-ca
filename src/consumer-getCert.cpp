@@ -63,14 +63,14 @@ public:
 private:
   
   std::string
-  fileLocation(const Interest& interest)
+  fileLocation(const Interest& interest,const std::string dir,const std::string extension)
   {
     // cert file location
     std::string subName = interest.getName().getSubName(3).toUri();
     std::string keyPrefix = "/ndn/ca" + subName; 
     //std::cout << keyPrefix << std::endl; 
     std::string keyPrefix_hash = std::to_string(std::hash<std::string>{}(keyPrefix));      
-    std::string location = "./cert/" + keyPrefix_hash + ".cert";
+    std::string location = dir + keyPrefix_hash + extension;
     
     return location;
   }
@@ -93,7 +93,7 @@ private:
     std::string content = content_c;
     std::cout << content << std::endl;
     
-    std::string loc = fileLocation(interest);
+    std::string loc = fileLocation(interest,"./cert/",".cert");
     writeFile(loc,content);
   }
 

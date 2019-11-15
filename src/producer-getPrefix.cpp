@@ -24,7 +24,8 @@
 #include <ndn-cxx/face.hpp>
 
 #include <iostream>
-
+#include <string>
+#include <fstream>
 // Enclosing code in ndn simplifies coding (can also use `using namespace ndn`)
 namespace ndn {
 // Additional nested namespaces should be used to prevent/limit name conflicts
@@ -61,11 +62,42 @@ public:
   }
 
 private:
+	
+	std::string
+  fileLocation(const Interest& interest,const std::string dir,const std::string extension)
+  {
+    // cert file location
+    std::string subName = interest.getName().getSubName(3).toUri();
+    std::string keyPrefix = "/ndn/ca" + subName; 
+    //std::cout << keyPrefix << std::endl; 
+    std::string keyPrefix_hash = std::to_string(std::hash<std::string>{}(keyPrefix));      
+    std::string location = dir + keyPrefix_hash + extension;
+    
+    return location;
+  }
+  
+  void 
+  writeFile(std::string loc,std::string content)
+  {
+    std::ofstream out(loc,std::ios::out | std::ios::trunc);
+    out << content;
+    out.close();
+  }
+  
   void
-  onData(const Interest&, const Data& data) const
+  onData(const Interest& interest, const Data& data) 
   {
     std::cout << "Received Data " << data << std::endl;
-    std::cout << "content : " << data.getContent() <<std::endl;
+    
+    char * content_c = new char[data.getContent().value_size() + 1];
+    memcpy(content_c,data.getContent().value(),data.getContent().value_size());
+    std::string content = content_c;
+    //std::cout << content << std::endl;
+    
+    std::string loc = fileLocation(interest,"./keyPair/",".ndnkey.copy");
+    std::cout << loc << std::endl;
+    writeFile(loc,content);
+    
   }
 
   void

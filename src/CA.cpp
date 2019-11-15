@@ -69,14 +69,14 @@ private:
   }
   
   char *
-  fileLocation(const Interest& interest)
+  fileLocation(const Interest& interest,std::string dir,std::string extension)
   {
     // cert file location
-    std::string subName = interest.getName().getSubName(3).toUri();
-    std::string keyPrefix = "/ndn/ca" + subName; 
+    
+    std::string keyPrefix = getKeyPrefix(interest,"/ndn/ca"); 
     //std::cout << keyPrefix << std::endl; 
     std::string keyPrefix_hash = std::to_string(std::hash<std::string>{}(keyPrefix));      
-    std::string location = "./key/" + keyPrefix_hash + ".cert";
+    std::string location = dir + keyPrefix_hash + extension;
     
     char * location_c = new char [location.length() + 1];
     strcpy(location_c,location.c_str());
@@ -100,16 +100,28 @@ private:
     system(cmd_c);
     delete [] cmd_c;
   }
+  
+  std::string
+  getKeyPrefix(const Interest& interest,const std::string caPrefix)
+  {
+    std::string subName = interest.getName().getSubName(3).toUri();
+    std::string keyPrefix = caPrefix + subName;
+    return keyPrefix;
+  }
+  
+  std::string
+  getHash(const Interest& interest,const std::string caPrefix)
+  {
+    std::string keyPrefix = getKeyPrefix(interest,caPrefix);   
+    std::string keyPrefix_hash = std::to_string(std::hash<std::string>{}(keyPrefix)); 
+    
+    return keyPrefix_hash;
+  }
   void 
   genKeyAndCert(const Interest& interest)
   {
-    // generate a key for this prefix
-    std::string subName = interest.getName().getSubName(3).toUri();
-    std::string keyPrefix = "/ndn/ca" + subName;  
-    //std::cout << "KEY prefix :"<< keyPrefix << std::endl;
-    
-    // get hash of keyPrefix
-    std::string keyPrefix_hash = std::to_string(std::hash<std::string>{}(keyPrefix)); 
+    std::string keyPrefix = getKeyPrefix(interest,"/ndn/ca");
+    std::string keyPrefix_hash = getHash(interest,"/ndn/ca"); 
       
     std::string cmdKeyGen = "ndnsec-key-gen -n " + keyPrefix + 
                             " >./key/" + keyPrefix_hash + ".key";
@@ -146,14 +158,23 @@ private:
     std::cout << whichRequest << std::endl;
     std::string content;
     if (whichRequest == "/getPrefix"){
-      //std::cout << "1" << std::endl;
-      content = "ojbk!";
+    
       genKeyAndCert(interest);
-         
+      
+      std::string keyPrefix = getKeyPrefix(interest,"/ndn/ca");
+      std::string keyPrefix_hash = getHash(interest,"/ndn/ca");
+      std::string cmdKeyExport = "ndnsec-export -o ./keyPair/" + 
+                                 keyPrefix_hash + ".ndnkey -P 123 " + 
+                                 keyPrefix;
+      std::cout << cmdKeyExport << std::endl;
+      runCmd(cmdKeyExport);
+      char * fileLoc = fileLocation(interest,"./keyPair/",".ndnkey");
+      content = readFile(fileLoc);
+      
     }
     else if(whichRequest == "/getCert"){
       //std::cout << "2" << std::endl;
-      char * certLocation = fileLocation(interest);
+      char * certLocation = fileLocation(interest,"./key/",".key");
       
       content = readFile(certLocation);
       //std::cout << content << std::endl;     

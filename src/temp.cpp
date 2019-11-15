@@ -32,7 +32,8 @@ std::string timeFormat(ndn::time::system_clock::TimePoint time){
 #include<functional>
 #include<string>
 #include<sstream>
-
+#include <stdlib.h>
+#include<string.h>
 std::string readFile(const char *pFileName)
 {
 	std::ifstream inFile(pFileName);
@@ -48,6 +49,13 @@ std::string readFile(const char *pFileName)
  
 	return contents;
 }
+void 
+runCmd(std::string cmd){
+  char *cmd_c = new char[cmd.length() + 1];
+  strcpy(cmd_c,cmd.c_str());
+  system(cmd_c);
+  delete [] cmd_c;
+}
 
 int main(int argc, char ** argv){
 /*
@@ -61,9 +69,8 @@ int main(int argc, char ** argv){
   std::cout << contents;
 	return 0;
 */
-	std::ofstream out("./test.1",std::ios::out | std::ios::trunc);
-	out << "string";
-	out.close();
+	runCmd("pwd");
+	return 0;
 }
 
 
