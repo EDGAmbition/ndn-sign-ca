@@ -1,12 +1,22 @@
-consumer: consumer-signed-data1.cpp
-	g++ -o consumer1 consumer-signed-data1.cpp -std=c++14 -lndn-cxx -lboost_system
-getPrefix: producer-getPrefix.cpp
-	g++ -o producer-getPrefix producer-getPrefix.cpp -std=c++14 -lndn-cxx -lboost_system
-ca: CA.cpp
-	g++ -o ca CA.cpp -std=c++14 -lndn-cxx -lboost_system
-temp : temp.cpp
-	g++ -o temp temp.cpp -std=c++14 -lndn-cxx -lboost_system
-consumer-getCert : consumer-getCert.cpp
-	g++ -o consumer-getCert consumer-getCert.cpp -std=c++14 -lndn-cxx -lboost_system
+consumer: ./src/consumer-signed-data1.cpp
+	g++ -o ./build/consumer1 ./src/consumer-signed-data1.cpp -std=c++14 -lndn-cxx -lboost_system
+	
+getPrefix: ./src/producer-getPrefix.cpp
+	g++ -o ./build/producer-getPrefix ./src/producer-getPrefix.cpp -std=c++14 -lndn-cxx -lboost_system
+	
+ca: ./src/CA.cpp
+	g++ -o ./build/ca ./src/CA.cpp -std=c++14 -lndn-cxx -lboost_system
+	
+temp : ./src/temp.cpp
+	g++ -o ./build/temp ./src/temp.cpp -std=c++14 -lndn-cxx -lboost_system
+	
+consumer-getCert : ./src/consumer-getCert.cpp
+	g++ -o ./build/consumer-getCert ./src/consumer-getCert.cpp -std=c++14 -lndn-cxx -lboost_system
+	
+consumer-signed-data : ./src/consumer-signed-data.cpp
+	g++ -o ./build/consumer-signed-data ./src/consumer-signed-data.cpp -std=c++14 -lndn-cxx -lboost_system
+producer-signed-data : ./src/producer-signed-data.cpp
+	g++ -o ./build/producer-signed-data ./src/producer-signed-data.cpp -std=c++14 -lndn-cxx -lboost_system
+
 clean:
 	rm send recv

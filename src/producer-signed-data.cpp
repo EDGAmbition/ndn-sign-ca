@@ -22,7 +22,7 @@ public:
     std::cout << "Data will be signed by: " << m_identity << std::endl;
     std::cout << "Interest Filter:  /example/test" << std::endl;
 
-    m_face.setInterestFilter("/example/test",
+    m_face.setInterestFilter("/ghy/1",
                              bind(&Producer::onInterest, this, _1, _2),
                              RegisterPrefixSuccessCallback(),
                              bind(&Producer::onRegisterFailed, this, _1, _2));
@@ -39,11 +39,10 @@ private:
 
     // Create new name, based on Interest's name
     Name dataName(interest.getName());
-    dataName
-      .append("testApp") // add "testApp" component to Interest name
-      .appendVersion();  // add "version" component (current UNIX timestamp in milliseconds)
+//  dataName.append("testApp").appendVersion();   // add "version" component 
+                                                  //(current UNIX timestamp in milliseconds)
 
-    static const std::string content = "DATA SIGNED with /ndn/keys/alice identity";
+    static const std::string content = "DATA SIGNED with /ndn/ca/ghy/1 identity";
 
     // Create Data packet
     shared_ptr<Data> data = make_shared<Data>();
@@ -58,7 +57,6 @@ private:
     std::cout << ">> D: " << *data << std::endl;
     std::cout << "Signature. KeyLocator: " <<
                 data->getSignature().getKeyLocator().getName() << std::endl;
-
 
     m_face.put(*data);
   }

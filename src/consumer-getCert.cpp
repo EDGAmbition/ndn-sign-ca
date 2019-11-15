@@ -24,25 +24,26 @@
 #include <ndn-cxx/face.hpp>
 
 #include <iostream>
-
+#include <string>
+#include <fstream>
 // Enclosing code in ndn simplifies coding (can also use `using namespace ndn`)
 namespace ndn {
 // Additional nested namespaces should be used to prevent/limit name conflicts
 namespace examples {
 
-class Producer
+class Consumer
 {
 public:
-  Producer(std::string &prefix) 
+  Consumer(const std::string &prefix)
   {
-    const std::string ca_prefix = "/ndn/ca";
-    m_prefix = ca_prefix + prefix;
+    const std::string caPrefix_getCert = "ndn/ca/getCert"; 
+    m_prefix = caPrefix_getCert + prefix;
   }
   void
   run()
   {
     Name interestName(m_prefix);
-    interestName.appendVersion();
+    //interestName.appendVersion();
 
     Interest interest(interestName);
     interest.setCanBePrefix(false);
@@ -51,20 +52,49 @@ public:
 
     std::cout << "Sending Interest " << interest << std::endl;
     m_face.expressInterest(interest,
-                           bind(&Producer::onData, this,  _1, _2),
-                           bind(&Producer::onNack, this, _1, _2),
-                           bind(&Producer::onTimeout, this, _1));
+                           bind(&Consumer::onData, this,  _1, _2),
+                           bind(&Consumer::onNack, this, _1, _2),
+                           bind(&Consumer::onTimeout, this, _1));
 
     // processEvents will block until the requested data is received or a timeout occurs
     m_face.processEvents();
   }
 
 private:
+  
+  std::string
+  fileLocation(const Interest& interest)
+  {
+    // cert file location
+    std::string subName = interest.getName().getSubName(3).toUri();
+    std::string keyPrefix = "/ndn/ca" + subName; 
+    //std::cout << keyPrefix << std::endl; 
+    std::string keyPrefix_hash = std::to_string(std::hash<std::string>{}(keyPrefix));      
+    std::string location = "./cert/" + keyPrefix_hash + ".cert";
+    
+    return location;
+  }
+  
+  void 
+  writeFile(std::string loc,std::string content)
+  {
+    std::ofstream out(loc,std::ios::out | std::ios::trunc);
+    out << content;
+    out.close();
+  }
+
   void
-  onData(const Interest&, const Data& data) const
+  onData(const Interest& interest, const Data& data) 
   {
     std::cout << "Received Data " << data << std::endl;
-    std::cout << "content : " << data.getContent() <<std::endl;
+    //std::cout << "content : " << data.getContent() <<std::endl;
+    char * content_c = new char[data.getContent().value_size() + 1];
+    memcpy(content_c,data.getContent().value(),data.getContent().value_size());
+    std::string content = content_c;
+    std::cout << content << std::endl;
+    
+    std::string loc = fileLocation(interest);
+    writeFile(loc,content);
   }
 
   void
@@ -82,6 +112,7 @@ private:
 private:
   Face m_face;
   std::string m_prefix;
+
 };
 
 } // namespace examples
@@ -89,18 +120,18 @@ private:
 
 int
 main(int argc, char** argv)
-{
-  if (argc != 2 || argv[1][0] != '/') {
-     std::cerr << "prefix must be specified,start with '/'" << std::endl;
-     return 1;
-  }
-
-  ndn::examples::Producer producer(argv[1]);
+{    
   try {
-    producer.run();
+    if (argc != 2 || argv[1][0] != '/') {
+      std::cerr << "prefix must be specified,start with '/'" << std::endl;
+      return 1;
+    }
+    ndn::examples::Consumer consumer(argv[1]);
+    consumer.run();
+    return 0;
   }
   catch (const std::exception& e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
+    return 1;
   }
-  return 0;
 }
