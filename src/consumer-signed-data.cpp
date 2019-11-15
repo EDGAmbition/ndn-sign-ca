@@ -29,7 +29,7 @@ public:
   run()
   { 
     // Request interest
-    Interest interest(Name("/ghy/1/abp159.avi"));
+    Interest interest(Name("/ghy/1/abc-123.avi"));
     interest.setInterestLifetime(time::milliseconds(1000));
     interest.setMustBeFresh(true);
 

@@ -14,13 +14,14 @@ class Producer : noncopyable
 public:
   Producer(const std::string &identity): m_identity(identity)
   {
+    
   }
 
   void
   run()
   {
     std::cout << "Data will be signed by: " << m_identity << std::endl;
-    std::cout << "Interest Filter:  /example/test" << std::endl;
+    std::cout << "Interest Filter:  " << std::endl;
 
     m_face.setInterestFilter("/ghy/1",
                              bind(&Producer::onInterest, this, _1, _2),
