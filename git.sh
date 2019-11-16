@@ -1,3 +1,3 @@
 git add . -u
-git commit -m $1.' '.$2
+git commit -m $1
 git push -u origin master
