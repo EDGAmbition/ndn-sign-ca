@@ -17,6 +17,9 @@ consumer-signed-data : ./src/consumer-signed-data.cpp
 	g++ -o ./build/consumer-signed-data ./src/consumer-signed-data.cpp -std=c++14 -lndn-cxx -lboost_system
 producer-signed-data : ./src/producer-signed-data.cpp
 	g++ -o ./build/producer-signed-data ./src/producer-signed-data.cpp -std=c++14 -lndn-cxx -lboost_system
+	
+pv2: ./src/v2/producer-getPrefix.cpp
+	g++ -o ./build/v2/producer-getPrefix ./src/v2/producer-getPrefix.cpp -std=c++14 -lndn-cxx -lboost_system	
 
 clean:
 	rm send recv
